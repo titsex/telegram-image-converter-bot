@@ -1,15 +1,20 @@
+import { generateKeyboardWithImageFormats } from '@utils'
 import { Context, NarrowedContext } from 'telegraf'
+import { cache, imageFormats } from '@constants'
+import { ImageFormatType } from '@types'
 import { Update } from 'telegraf/types'
 
-export default async function document(context: NarrowedContext<Context, Update>) {
+export default async function documentHandler(context: NarrowedContext<Context, Update>) {
     if ('document' in context.message!) {
         const document = context.message.document
 
-        if (!document.mime_type?.includes('image'))
-            return context.reply('[ERROR] The document extenstion must be an image!')
+        if (!imageFormats.includes(document.mime_type!.split('/')[1] as ImageFormatType))
+            return context.reply('[ERROR] The document extension must be an image!')
 
-        const { href } = await context.telegram.getFileLink(document.file_id)
+        cache.set(context.message.message_id.toString(), document.file_id)
 
-        console.log(href) // TODO: handle image!
+        return await context.reply('Select the format to convert:', {
+            reply_markup: await generateKeyboardWithImageFormats(context.message.message_id.toString()),
+        })
     }
 }

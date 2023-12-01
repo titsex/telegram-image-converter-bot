@@ -1,6 +1,10 @@
+import sharp, { AvailableFormatInfo } from 'sharp'
 import Logger from '@class/Logger'
+import axios from 'axios'
 
-import { HandlerType, IHandler, IModule } from '@types'
+import { HandlerType, IHandler, ImageFormatType, IModule } from '@types'
+import { imageFormats } from '@constants'
+import { Markup } from 'telegraf'
 import { readdirSync } from 'fs'
 import { join } from 'path'
 
@@ -12,7 +16,7 @@ export async function collectModules(modulesPath: string): Promise<IModule[]> {
     for (const file of dir) {
         const module = await import(`file://${join(modulesPath, file)}`)
 
-        const name = file.match(/(.+?)\./i)![1]
+        const name = file.split('.')[0]
 
         modules.push({
             name,
@@ -34,15 +38,35 @@ export async function collectHandlers(handlersPath: string): Promise<IHandler[]>
     for (const file of dir) {
         const handler = await import(`file://${join(handlersPath, file)}`)
 
-        const name = file.match(/(.+?)\./i)![1] as HandlerType
+        const name = file.split('.')[0] as HandlerType
 
         handlers.push({
             name,
             callback: handler.default.default,
         })
 
-        Logger.handler(name, 'loaded')
+        Logger.handler(name)
     }
 
     return handlers
+}
+
+export async function convertImage(url: string, format: ImageFormatType) {
+    const response = await axios.get(url, { responseType: 'arraybuffer' })
+    const buffer = Buffer.from(response.data)
+
+    return await sharp(buffer)
+        .toFormat(format as unknown as AvailableFormatInfo)
+        .toBuffer()
+}
+
+export async function generateKeyboardWithImageFormats(messageId: string) {
+    const buttons = []
+
+    for (const format of imageFormats) {
+        const button = Markup.button.callback(format, `convert-${messageId}-${format}`)
+        buttons.push(button)
+    }
+
+    return Markup.inlineKeyboard(buttons, { columns: 2 }).reply_markup
 }

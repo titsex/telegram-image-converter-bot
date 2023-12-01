@@ -1,17 +1,4 @@
-const COLORS: Record<string, string> = {
-    NONE: '\x1b[0',
-    CYAN: '\x1b[36',
-    RED: '\x1b[31',
-    YELLOW: '\x1b[33',
-    MAGENTA: '\x1b[35',
-    GREEN: '\x1b[32',
-    GRAY: '\x1b[90',
-}
-
-const FONT_WEIGHT: Record<string, string> = {
-    NONE: 'm',
-    BOLD: ';1m',
-}
+import { COLORS, FONT_WEIGHT } from '@constants'
 
 class Logger {
     private static defaultLogParams: string = `${COLORS.NONE + FONT_WEIGHT.NONE}`
@@ -20,7 +7,10 @@ class Logger {
     private static infoLogPrefix: string = `[${COLORS.CYAN + FONT_WEIGHT.BOLD}INFO${Logger.defaultLogParams}]`
     private static moduleLogPrefix: string = `[${COLORS.MAGENTA + FONT_WEIGHT.BOLD}MODULE${Logger.defaultLogParams}]`
     private static commandLogPrefix: string = `[${COLORS.GREEN + FONT_WEIGHT.BOLD}COMMAND${Logger.defaultLogParams}]`
-    private static handlerLogPrefix: string = `[${COLORS.GRAY + FONT_WEIGHT.BOLD}HANDLER${Logger.defaultLogParams}]`
+    private static handlerLogPrefix: string = `[${COLORS.CHILI + FONT_WEIGHT.BOLD}HANDLER${Logger.defaultLogParams}]`
+    private static middlewareLogPrefix: string = `[${COLORS.BLUE + FONT_WEIGHT.BOLD}MIDDLEWARE${
+        Logger.defaultLogParams
+    }]`
 
     private static time(): string {
         return `${COLORS.YELLOW + FONT_WEIGHT.NONE}${new Date().toLocaleTimeString()}${COLORS.NONE}${FONT_WEIGHT.BOLD}`
@@ -45,15 +35,25 @@ class Logger {
     public static command(name: string): void {
         console.log(
             `${Logger.commandLogPrefix} ${Logger.time()}`,
-            `${COLORS.MAGENTA + FONT_WEIGHT.BOLD}${name}${Logger.defaultLogParams} command was successfully registered`,
+            `${COLORS.BLUE + FONT_WEIGHT.BOLD}${name}${Logger.defaultLogParams} command was successfully registered`,
             Logger.defaultLogParams
         )
     }
 
-    public static handler(name: string, type: 'loaded' | 'registered'): void {
+    public static middleware(name: string): void {
+        console.log(
+            `${Logger.middlewareLogPrefix} ${Logger.time()}`,
+            `${COLORS.GREEN + FONT_WEIGHT.BOLD}${name}${
+                Logger.defaultLogParams
+            } middleware was successfully registered`,
+            Logger.defaultLogParams
+        )
+    }
+
+    public static handler(name: string): void {
         console.log(
             `${Logger.handlerLogPrefix} ${Logger.time()}`,
-            `${COLORS.GREEN + FONT_WEIGHT.BOLD}${name}${Logger.defaultLogParams} hander was successfully ${type}`,
+            `${COLORS.MAGENTA + FONT_WEIGHT.BOLD}${name}${Logger.defaultLogParams} handler was successfully registered`,
             Logger.defaultLogParams
         )
     }

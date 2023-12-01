@@ -1,13 +1,11 @@
+import actionHandler from '@handler/action.handler'
 import Logger from '@class/Logger'
 
 import { collectHandlers, collectModules } from '@utils'
+import { handlersPath, modulesPath } from '@constants'
 import { IHandler, IModule } from '@types'
 import { message } from 'telegraf/filters'
 import { Telegraf } from 'telegraf'
-import { join } from 'path'
-
-const modulesPath = join(__dirname, 'modules')
-const handlersPath = join(__dirname, 'handlers')
 
 export let modules: IModule[] = []
 export let handlers: IHandler[] = []
@@ -27,12 +25,14 @@ const start = async () => {
 
     for (const handler of handlers) {
         bot.on(message(handler.name), handler.callback)
-        Logger.handler(handler.name, 'registered')
+        Logger.middleware(handler.name)
     }
 
     bot.on('message', async (context) => await context.reply('[ERROR] Send me the image!'))
+    bot.action(/convert-(.+)-(.+)/i, actionHandler)
 
-    bot.launch()
+    Logger.info('Bot has been successfully started')
+    await bot.launch()
 }
 
-start().then(() => Logger.info('Bot has been successfully started'))
+start()

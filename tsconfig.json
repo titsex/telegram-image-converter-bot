@@ -9,13 +9,13 @@
         "forceConsistentCasingInFileNames": true,
         "incremental": true,
         "outDir": "./build",
-        "baseUrl": "./src",
         "paths": {
-            "@handler/*": ["handlers/*"],
-            "@class/*": ["classes/*"],
-            "@types": ["types"],
-            "@index": ["index"],
-            "@utils": ["utils"]
+            "@handler/*": ["./src/handlers/*"],
+            "@class/*": ["./src/classes/*"],
+            "@types": ["./src/types"],
+            "@index": ["./src/index"],
+            "@constants": ["./src/constants"],
+            "@utils": ["./src/utils"]
         }
     },
     "include": ["./src/**/*"]
