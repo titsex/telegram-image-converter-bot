@@ -2,10 +2,10 @@ import sharp, { AvailableFormatInfo } from 'sharp'
 import Logger from '@class/Logger'
 import axios from 'axios'
 
-import { HandlerType, IHandler, ImageFormatType, IModule } from '@types'
-import { imageFormats } from '@constants'
+import { HandlerType, IActionCache, IContext, IHandler, ImageFormatType, IModule } from '@types'
+import { actionTypes, imageFormats } from '@constants'
+import { readdirSync, statSync } from 'fs'
 import { Markup } from 'telegraf'
-import { readdirSync } from 'fs'
 import { join } from 'path'
 
 export async function collectModules(modulesPath: string): Promise<IModule[]> {
@@ -14,8 +14,9 @@ export async function collectModules(modulesPath: string): Promise<IModule[]> {
     const dir = readdirSync(modulesPath)
 
     for (const file of dir) {
-        const module = await import(`file://${join(modulesPath, file)}`)
+        if (statSync(join(modulesPath, file)).isDirectory()) continue
 
+        const module = await import(`file://${join(modulesPath, file)}`)
         const name = file.split('.')[0]
 
         modules.push({
@@ -36,8 +37,10 @@ export async function collectHandlers(handlersPath: string): Promise<IHandler[]>
     const dir = readdirSync(handlersPath)
 
     for (const file of dir) {
-        const handler = await import(`file://${join(handlersPath, file)}`)
+        if (file.startsWith('-')) continue
+        if (statSync(join(handlersPath, file)).isDirectory()) continue
 
+        const handler = await import(`file://${join(handlersPath, file)}`)
         const name = file.split('.')[0] as HandlerType
 
         handlers.push({
@@ -60,13 +63,35 @@ export async function convertImage(url: string, format: ImageFormatType) {
         .toBuffer()
 }
 
-export async function generateKeyboardWithImageFormats(messageId: string) {
+export async function resizeImage(url: string, width: number, height: number) {
+    const response = await axios.get(url, { responseType: 'arraybuffer' })
+    const buffer = Buffer.from(response.data)
+
+    return await sharp(buffer).resize(width, height).toBuffer()
+}
+
+export async function generateKeyboardWithImageFormats(userId: string, fileId: string) {
     const buttons = []
 
     for (const format of imageFormats) {
-        const button = Markup.button.callback(format, `convert-${messageId}-${format}`)
+        const button = Markup.button.callback(format, `convert~${userId}~${fileId}~${format}`)
         buttons.push(button)
     }
 
     return Markup.inlineKeyboard(buttons, { columns: 2 }).reply_markup
+}
+
+export async function generateKeyboardWithActions(userId: string, fileId: string) {
+    const buttons = []
+
+    for (const action of actionTypes) {
+        const button = Markup.button.callback(action, `${action}~${userId}~${fileId}`)
+        buttons.push(button)
+    }
+
+    return Markup.inlineKeyboard(buttons).reply_markup
+}
+
+export function extendContext(context: IContext) {
+    context.session ??= { requests: new Map<number, IActionCache[]>() }
 }

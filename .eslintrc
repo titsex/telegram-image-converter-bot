@@ -8,6 +8,7 @@
     "plugins": ["@typescript-eslint", "prettier"],
     "rules": {
         "prettier/prettier": "error",
-        "linebreak-style": ["error", "unix"]
+        "linebreak-style": ["error", "unix"],
+        "no-case-declarations": "off"
     }
 }

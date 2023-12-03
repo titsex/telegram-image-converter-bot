@@ -1,11 +1,11 @@
-import { ImageFormatType } from '@types'
+import { ActionType, ImageFormatType } from '@types'
 import { join } from 'path'
 
 export const modulesPath = join(__dirname, 'modules')
 export const handlersPath = join(__dirname, 'handlers')
-
-export const cache: Map<string, string> = new Map<string, string>()
 export const imageFormats: ImageFormatType[] = ['avif', 'jpeg', 'jpg', 'jpe', 'png', 'tiff', 'tif', 'webp']
+
+export const actionTypes: ActionType[] = ['convert', 'resize']
 
 export const COLORS: Record<string, string> = {
     NONE: '\x1b[0',
