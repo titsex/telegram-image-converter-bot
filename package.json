@@ -14,12 +14,12 @@
         "prod": "npm-run-all build:clean build start"
     },
     "devDependencies": {
-        "@types/node": "^20.10.1",
-        "@typescript-eslint/eslint-plugin": "^6.13.1",
-        "@typescript-eslint/parser": "^6.13.1",
+        "@types/node": "^20.10.3",
+        "@typescript-eslint/eslint-plugin": "^6.13.2",
+        "@typescript-eslint/parser": "^6.13.2",
         "dotenv": "^16.3.1",
-        "eslint": "^8.54.0",
-        "eslint-config-prettier": "^9.0.0",
+        "eslint": "^8.55.0",
+        "eslint-config-prettier": "^9.1.0",
         "eslint-plugin-prettier": "^5.0.1",
         "npm-run-all": "^4.1.5",
         "prettier": "^3.1.0",
@@ -32,6 +32,6 @@
     "dependencies": {
         "axios": "^1.6.2",
         "sharp": "^0.33.0",
-        "telegraf": "^4.15.2"
+        "telegraf": "^4.15.3"
     }
 }
