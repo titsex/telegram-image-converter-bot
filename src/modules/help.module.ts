@@ -3,7 +3,7 @@ import { modules } from '@index'
 
 export default async function help(context: Context) {
     return context.reply(
-        `List of available commands:\n${modules
+        `To get started, you need to send me an image or sticker, select one of the actions and follow the instructions below!\n\nList of available commands:${modules
             .map((module) => (module.name === 'help' ? '' : `/${module.name} - ${module.description}`))
             .join('\n')}`
     )

@@ -1,5 +1,8 @@
-import { convertImage, extendContext, generateKeyboardWithActions, generateKeyboardWithImageFormats } from '@utils'
+import responseHandler from '@handler/actions/-response.handler'
+
+import { convertImage, extendContext, generateKeyboardWithImageFormats } from '@utils'
 import { ActionMatchType, IContext, ImageFormatType } from '@types'
+import { Document, Message } from 'telegraf/types'
 
 export default async function actionHandler(context: IContext) {
     extendContext(context)
@@ -14,42 +17,39 @@ export default async function actionHandler(context: IContext) {
     const requests = context.session.requests.get(context.update.callback_query.from.id)
 
     const request = requests?.find((file) => file.fileUniqueId === fileId)
-    if (!request) return await context.reply('Image not found...')
-
-    await context.deleteMessage(context.update.callback_query.message!.message_id)
+    if (!request) return await context.reply('The action has expired!')
 
     if (!payload) {
         request.type = type
 
         switch (type) {
             case 'convert':
-                return await context.reply('Select the format to convert:', {
-                    reply_markup: await generateKeyboardWithImageFormats(userId, request.fileUniqueId),
-                })
+                return await context.editMessageReplyMarkup(
+                    await generateKeyboardWithImageFormats(userId, request.fileUniqueId),
+                )
             case 'resize':
                 return await context.reply('Send me a new size. For example, 640x400.')
-            default:
-                return await context.reply('Select an action.', {
-                    reply_markup: await generateKeyboardWithActions(userId, request.fileUniqueId),
-                })
         }
     }
 
+    let message = {} as Message
+
     switch (type) {
         case 'convert':
-            context.session.requests.set(
-                context.update.callback_query.from.id,
-                requests?.filter((file) => file.fileUniqueId !== request.fileUniqueId) || []
-            )
+            delete request.type
 
-            return await context.replyWithDocument(
+            message = await context.replyWithDocument(
                 {
                     source: await convertImage(request.url, payload as ImageFormatType),
-                    filename: `converted.${payload}`,
+                    filename: `converted.${payload}`
                 },
-                {
-                    caption: 'Thanks for waiting.',
-                }
             )
+
+            if (payload === 'webp' && 'sticker' in message)
+                message.document = message.sticker as Document
+
+            break
     }
+
+    return await responseHandler(context, message, request)
 }

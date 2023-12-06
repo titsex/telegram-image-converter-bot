@@ -70,22 +70,22 @@ export async function resizeImage(url: string, width: number, height: number) {
     return await sharp(buffer).resize(width, height).toBuffer()
 }
 
-export async function generateKeyboardWithImageFormats(userId: string, fileId: string) {
+export async function generateKeyboardWithImageFormats(userId: string, fileUniqueId: string) {
     const buttons = []
 
     for (const format of imageFormats) {
-        const button = Markup.button.callback(format, `convert~${userId}~${fileId}~${format}`)
+        const button = Markup.button.callback(format, `convert~${userId}~${fileUniqueId}~${format}`)
         buttons.push(button)
     }
 
     return Markup.inlineKeyboard(buttons, { columns: 2 }).reply_markup
 }
 
-export async function generateKeyboardWithActions(userId: string, fileId: string) {
+export async function generateKeyboardWithActions(userId: string, fileUniqueId: string) {
     const buttons = []
 
     for (const action of actionTypes) {
-        const button = Markup.button.callback(action, `${action}~${userId}~${fileId}`)
+        const button = Markup.button.callback(action, `${action}~${userId}~${fileUniqueId}`)
         buttons.push(button)
     }
 
