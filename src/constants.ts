@@ -1,9 +1,12 @@
-import { ActionType, ImageFormatType } from '@types'
+import { ActionType, ImageFormatType, ResizeFitType } from '@types'
 import { join } from 'path'
 
 export const modulesPath = join(__dirname, 'modules')
 export const handlersPath = join(__dirname, 'handlers')
+
 export const imageFormats: ImageFormatType[] = ['avif', 'jpeg', 'jpg', 'jpe', 'png', 'tiff', 'tif', 'webp']
+
+export const resizeFitFormats: ResizeFitType[] = ['fill', 'cover', 'inside', 'contain', 'outside']
 
 export const actionTypes: ActionType[] = ['convert', 'resize']
 

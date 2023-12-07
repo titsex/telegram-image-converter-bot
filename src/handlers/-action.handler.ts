@@ -1,6 +1,12 @@
 import responseHandler from '@handler/actions/-response.handler'
 
-import { convertImage, extendContext, generateKeyboardWithImageFormats } from '@utils'
+import {
+    convertImage,
+    extendContext,
+    generateKeyboardWithImageFormats,
+    generateKeyboardWithResizeFitFormats,
+} from '@utils'
+
 import { ActionMatchType, IContext, ImageFormatType } from '@types'
 import { Document, Message } from 'telegraf/types'
 
@@ -25,30 +31,33 @@ export default async function actionHandler(context: IContext) {
         switch (type) {
             case 'convert':
                 return await context.editMessageReplyMarkup(
-                    await generateKeyboardWithImageFormats(userId, request.fileUniqueId),
+                    generateKeyboardWithImageFormats(userId, request.fileUniqueId)
                 )
             case 'resize':
-                return await context.reply('Send me a new size. For example, 640x400.')
+                return await context.editMessageReplyMarkup(
+                    generateKeyboardWithResizeFitFormats(userId, request.fileUniqueId)
+                )
         }
     }
 
     let message = {} as Message
 
+    request.payload = payload
+
     switch (type) {
         case 'convert':
             delete request.type
 
-            message = await context.replyWithDocument(
-                {
-                    source: await convertImage(request.url, payload as ImageFormatType),
-                    filename: `converted.${payload}`
-                },
-            )
+            message = await context.replyWithDocument({
+                source: await convertImage(request.url, payload as ImageFormatType),
+                filename: `converted.${payload}`,
+            })
 
-            if (payload === 'webp' && 'sticker' in message)
-                message.document = message.sticker as Document
+            if (payload === 'webp' && 'sticker' in message) message.document = message.sticker as Document
 
             break
+        case 'resize':
+            return await context.reply('Send me a new size. For example, 640x400!')
     }
 
     return await responseHandler(context, message, request)

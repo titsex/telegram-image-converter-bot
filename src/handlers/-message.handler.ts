@@ -2,7 +2,7 @@ import responseHandler from '@handler/actions/-response.handler'
 
 import { extendContext, resizeImage } from '@utils'
 import { Message, Document } from 'telegraf/types'
-import { IContext } from '@types'
+import { IContext, ResizeFitType } from '@types'
 
 export default async function messageHandler(context: IContext, next: () => Promise<void>) {
     extendContext(context)
@@ -24,19 +24,16 @@ export default async function messageHandler(context: IContext, next: () => Prom
 
                 const [width, height] = context.message.text.split(/[xх]/i)
 
-                message = await context.replyWithDocument(
-                    {
-                        source: await resizeImage(request.url, +width, +height),
-                        filename: `resized.${payload}`
-                    }
-                )
+                message = await context.replyWithDocument({
+                    source: await resizeImage(request.url, +width, +height, request.payload as ResizeFitType),
+                    filename: `resized.${payload}`,
+                })
 
-                if (payload === 'webp' && 'sticker' in message)
-                message.document = message.sticker as Document
+                if (payload === 'webp' && 'sticker' in message) message.document = message.sticker as Document
 
                 break
-       }
+        }
 
-       return await responseHandler(context, message, request)
+        return await responseHandler(context, message, request)
     }
 }

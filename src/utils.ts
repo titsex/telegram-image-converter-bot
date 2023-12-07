@@ -2,8 +2,8 @@ import sharp, { AvailableFormatInfo } from 'sharp'
 import Logger from '@class/Logger'
 import axios from 'axios'
 
-import { HandlerType, IActionCache, IContext, IHandler, ImageFormatType, IModule } from '@types'
-import { actionTypes, imageFormats } from '@constants'
+import { HandlerType, IActionCache, IContext, IHandler, ImageFormatType, IModule, ResizeFitType } from '@types'
+import { actionTypes, imageFormats, resizeFitFormats } from '@constants'
 import { readdirSync, statSync } from 'fs'
 import { Markup } from 'telegraf'
 import { join } from 'path'
@@ -63,14 +63,28 @@ export async function convertImage(url: string, format: ImageFormatType) {
         .toBuffer()
 }
 
-export async function resizeImage(url: string, width: number, height: number) {
+export async function resizeImage(url: string, width: number, height: number, fit: ResizeFitType) {
     const response = await axios.get(url, { responseType: 'arraybuffer' })
     const buffer = Buffer.from(response.data)
 
-    return await sharp(buffer).resize(width, height).toBuffer()
+    return await sharp(buffer)
+        .resize(width, height, {
+            fit,
+        })
+        .toBuffer()
+}
+export function generateKeyboardWithResizeFitFormats(userId: string, fileUniqueId: string) {
+    const buttons = []
+
+    for (const fit of resizeFitFormats) {
+        const button = Markup.button.callback(fit, `resize~${userId}~${fileUniqueId}~${fit}`)
+        buttons.push(button)
+    }
+
+    return Markup.inlineKeyboard(buttons, { columns: 2 }).reply_markup
 }
 
-export async function generateKeyboardWithImageFormats(userId: string, fileUniqueId: string) {
+export function generateKeyboardWithImageFormats(userId: string, fileUniqueId: string) {
     const buttons = []
 
     for (const format of imageFormats) {
@@ -81,7 +95,7 @@ export async function generateKeyboardWithImageFormats(userId: string, fileUniqu
     return Markup.inlineKeyboard(buttons, { columns: 2 }).reply_markup
 }
 
-export async function generateKeyboardWithActions(userId: string, fileUniqueId: string) {
+export function generateKeyboardWithActions(userId: string, fileUniqueId: string) {
     const buttons = []
 
     for (const action of actionTypes) {

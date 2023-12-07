@@ -7,6 +7,8 @@ export type ActionType = 'convert' | 'resize'
 
 export type ImageFormatType = 'avif' | 'jpeg' | 'jpg' | 'jpe' | 'png' | 'tiff' | 'tif' | 'webp'
 
+export type ResizeFitType = 'cover' | 'contain' | 'fill' | 'inside' | 'outside'
+
 export type ActionMatchType = [type: ActionType, userId: string, fileId: string, payload: string]
 
 export interface ISession {
@@ -22,6 +24,7 @@ export interface IActionCache {
     fileUniqueId: string
     url: string
     type?: ActionType
+    payload?: string
 }
 
 export interface IModule {
